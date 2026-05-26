@@ -85,9 +85,9 @@ td a{color:#1677ff;text-decoration:none}
     <h1>竞品动态监控</h1>
     <div class="tabs">
       <button :class="{active:tab==='dashboard'}" @click="tab='dashboard'">看板</button>
-      <button :class="{active:tab==='cards'}" @click="tab='cards'">卡片</button>
+      <button :class="{active:tab==='cards'}" @click="tab='cards'">动态卡片</button>
       <button :class="{active:tab==='revenue'}" @click="tab='revenue'">竞品数据</button>
-      <button :class="{active:tab==='trend'}" @click="tab='trend';$nextTick(()=>renderTrend())">趋势分析</button>
+      <button :class="{active:tab==='trend'}" @click="tab='trend';$nextTick(()=>renderTrend())">动态时轴图</button>
       <button :class="{active:tab==='table'}" @click="tab='table'">源数据</button>
     </div>
     <span style="margin-left:auto;font-size:12px;color:#8f959e;">数据源：微博 + Sensor Tower (est.)</span>
@@ -225,7 +225,7 @@ td a{color:#1677ff;text-decoration:none}
         </select>
       </div>
       <div id="trendChart" style="width:100%;height:420px;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06)"></div>
-      <p style="margin-top:8px;font-size:11px;color:#8f959e">曲线上的标注点为该游戏的【商业化】【版本更新】动态。鼠标悬停可查看详情。</p>
+      <p style="margin-top:8px;font-size:11px;color:#8f959e">曲线上的标注点为该游戏的各类动态事件。点击图例可显示/隐藏对应类型。鼠标悬停标注点查看详情。</p>
     </div>
     <div v-show="tab==='table'">
       <div class="table-wrap">
@@ -306,34 +306,31 @@ createApp({
       const sliced=daily.slice(-rangeDays);
       const dates=sliced.map(d=>d.date);
       const values=sliced.map(d=>metric==="revenue"?Math.round(d.value*7.2/10000):Math.round(d.value/10000));
-      const events=data.value.filter(d=>d.game===game&&(d.type==="商业化"||d.type==="版本更新")&&dates.includes(d.action_time));
-      const markData=events.map(ev=>{const idx=dates.indexOf(ev.action_time);return{coord:[idx,values[idx]||0],name:ev.title,itemStyle:{color:ev.type==="商业化"?"#d46b08":"#0958d9"},symbolSize:10}});
+      const typeColors={"商业化":"#d46b08","版本更新":"#0958d9","玩法上新":"#389e0d","联动":"#c41d7f","运营活动":"#faad14","赛事":"#722ed1","市场":"#13c2c2","内容生态":"#eb2f96"};
+      const allEvents=data.value.filter(d=>d.game===game&&dates.includes(d.action_time));
+      const eventTypes=[...new Set(allEvents.map(e=>e.type))];
+      const scatterSeries=eventTypes.map(t=>{
+        const evts=allEvents.filter(e=>e.type===t);
+        const pts=evts.map(ev=>{const idx=dates.indexOf(ev.action_time);return[dates[idx],values[idx]||0,ev.title,ev.summary||""]});
+        return{name:t,type:"scatter",data:pts,symbolSize:12,itemStyle:{color:typeColors[t]||"#888"},z:10,tooltip:{formatter:function(p){return'<b style="color:'+(typeColors[p.seriesName]||"#888")+'">'+p.seriesName+'</b><br/>'+p.data[2]+'<br/><span style="color:#666;font-size:11px">'+p.data[3].slice(0,80)+'</span>'}}};
+      });
       if(trendChartInstance)trendChartInstance.dispose();
       trendChartInstance=echarts.init(el);
       trendChartInstance.setOption({
-        tooltip:{trigger:"axis",axisPointer:{type:"cross"},formatter:function(params){
-          let tip=params[0].axisValue+"<br/>";
-          params.forEach(p=>{tip+=p.marker+(metric==="revenue"?p.value.toLocaleString()+"万元":p.value.toLocaleString()+"万次")+"<br/>"});
-          const evts=events.filter(e=>e.action_time===params[0].axisValue);
-          evts.forEach(e=>{tip+='<div style="margin-top:4px;padding:4px 8px;background:'+(e.type==="商业化"?"#fff7e6":"#e6f4ff")+';border-radius:4px;font-size:11px"><b>'+e.type+'</b> '+e.title+'<br/><span style="color:#666">'+((e.summary||"").slice(0,60))+'</span></div>'});
-          return tip;
-        }},
+        tooltip:{trigger:"item",confine:true},
+        legend:{data:[metric==="revenue"?"流水":"下载",...eventTypes],top:8,textStyle:{fontSize:11},selectedMode:true},
         xAxis:{type:"category",data:dates,axisLabel:{fontSize:11,formatter:v=>v.slice(5)}},
         yAxis:{type:"value",name:metric==="revenue"?"万元":"万次",axisLabel:{fontSize:11}},
         series:[{
+          name:metric==="revenue"?"流水":"下载",
           type:"line",smooth:true,data:values,
-          lineStyle:{color:metric==="revenue"?"#d46b08":"#1677ff",width:2},
-          areaStyle:{color:metric==="revenue"?"rgba(212,107,8,0.08)":"rgba(22,119,255,0.08)"},
-          itemStyle:{color:metric==="revenue"?"#d46b08":"#1677ff"},
+          lineStyle:{color:"#333",width:2},
+          areaStyle:{color:"rgba(0,0,0,0.04)"},
+          itemStyle:{color:"#333"},
           symbolSize:0,
-          markPoint:{
-            data:markData,
-            symbol:"circle",
-            label:{show:false},
-            tooltip:{formatter:function(p){const ev=events.find(e=>e.title===p.name);return ev?'<b>'+ev.type+'</b><br/>'+ev.title+'<br/><span style="color:#666;font-size:11px">'+(ev.summary||"").slice(0,80)+'</span>':p.name}}
-          }
-        }],
-        grid:{left:60,right:20,top:40,bottom:40},
+          tooltip:{trigger:"axis",formatter:function(p){return p.name+"<br/>"+(metric==="revenue"?p.value.toLocaleString()+"万元":p.value.toLocaleString()+"万次")}}
+        },...scatterSeries],
+        grid:{left:60,right:20,top:50,bottom:40},
         dataZoom:[{type:"inside",start:0,end:100}]
       });
     };
