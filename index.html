@@ -125,11 +125,14 @@ td a{color:#1677ff;text-decoration:none}
           </div>
         </div>
         <div class="cards-grid">
-          <div class="card" v-for="d in filteredData" :key="d.id" :style="{borderLeftColor:typeColor(d.type)}">
+          <div class="card" v-for="d in filteredData" :key="d.id" :style="{borderLeftColor:typeColor(d.type)}" @click="toggleCard(d)">
             <div class="tags"><span class="tag tag-game">{{d.game}}</span><span class="tag" :class="typeTagClass(d.type)">{{d.type}}</span></div>
             <div class="title">{{d.title}}</div>
             <div class="summary">{{d.summary}}</div>
-            <div class="meta"><span>{{d.action_time}}</span><a :href="d.source_url" target="_blank" v-if="d.source_url">原文</a></div>
+            <div class="meta"><span>{{d.action_time}}</span><a :href="d.source_url" target="_blank" v-if="d.source_url" @click.stop>原文</a></div>
+            <div v-if="expandedCard===d.id&&(d.type==='商业化'||d.type==='版本更新')" style="margin-top:12px;border-top:1px solid #f0f1f2;padding-top:12px">
+              <div :id="'miniChart_'+d.id" style="width:100%;height:180px"></div>
+            </div>
           </div>
           <div class="empty" v-if="!filteredData.length">暂无匹配的动态</div>
         </div>
@@ -281,7 +284,41 @@ createApp({
     const trendMetric=ref("revenue");
     const trendRange=ref("90");
     const trendGameList=computed(()=>Object.keys(TRENDS).sort());
+    const expandedCard=ref(null);
     let trendChartInstance=null;
+    const toggleCard=(d)=>{
+      if(d.type!=="商业化"&&d.type!=="版本更新")return;
+      if(expandedCard.value===d.id){expandedCard.value=null;return}
+      expandedCard.value=d.id;
+      nextTick(()=>renderMiniChart(d));
+    };
+    const renderMiniChart=(d)=>{
+      const el=document.getElementById("miniChart_"+d.id);
+      if(!el)return;
+      const tData=TRENDS[d.game];
+      if(!tData)return;
+      const daily=tData["revenue"]||[];
+      const last60=daily.slice(-60);
+      const dates=last60.map(x=>x.date);
+      const values=last60.map(x=>Math.round(x.value*7.2/10000));
+      const allEvents=data.value.filter(e=>e.game===d.game&&(e.type==="商业化"||e.type==="版本更新")&&dates.includes(e.action_time));
+      const scatterData=allEvents.map(ev=>{
+        const isCurrent=ev.id===d.id;
+        return{value:[ev.action_time,values[dates.indexOf(ev.action_time)]||0],itemStyle:{color:isCurrent?"#e24b4a":"#bbb"},symbolSize:isCurrent?14:7,name:ev.title,summary:ev.summary||"",isCurrent:isCurrent}
+      });
+      echarts.dispose(el);
+      const chart=echarts.init(el);
+      chart.setOption({
+        tooltip:{trigger:"item",formatter:function(p){if(p.seriesType==="scatter")return"<b>"+p.data.name+"</b><br/>"+(p.data.summary||"").slice(0,60);return p.name+"<br/>"+p.value.toLocaleString()+"万元"}},
+        xAxis:{type:"category",data:dates,axisLabel:{fontSize:10,formatter:v=>v.slice(5)}},
+        yAxis:{type:"value",axisLabel:{fontSize:10},splitNumber:3},
+        series:[
+          {type:"line",data:values,smooth:true,lineStyle:{color:"#333",width:1.5},areaStyle:{color:"rgba(0,0,0,0.03)"},itemStyle:{color:"#333"},symbolSize:0},
+          {type:"scatter",data:scatterData,z:10}
+        ],
+        grid:{left:45,right:10,top:10,bottom:28}
+      });
+    };
     const renderCharts=()=>{
       const gameMap={};data.value.forEach(d=>{gameMap[d.game]=(gameMap[d.game]||0)+1});
       const games=Object.entries(gameMap).sort((a,b)=>b[1]-a[1]);
@@ -336,7 +373,7 @@ createApp({
     };
     watch(tab,(v)=>{if(v==="dashboard")nextTick(renderCharts);if(v==="trend")nextTick(renderTrend)});
     onMounted(()=>nextTick(renderCharts));
-    return {data,tab,search,sortKey,sortDir,filterStart,filterEnd,filterGames,filterTypes,allGames,allTypes,gamesByCategory,typeStats,typeCountMap,catCount,isCatChecked,toggleCategory,typeColor,typeTagClass,filteredData,tableData,sortBy,revStats,dlStats,sortedRevStats,sortedDlStats,revSortKey,dlSortKey,showChange,fmtNum,fmtPct,pctClass,trendGame,trendMetric,trendRange,trendGameList,renderTrend};
+    return {data,tab,search,sortKey,sortDir,filterStart,filterEnd,filterGames,filterTypes,allGames,allTypes,gamesByCategory,typeStats,typeCountMap,catCount,isCatChecked,toggleCategory,typeColor,typeTagClass,filteredData,tableData,sortBy,revStats,dlStats,sortedRevStats,sortedDlStats,revSortKey,dlSortKey,showChange,fmtNum,fmtPct,pctClass,trendGame,trendMetric,trendRange,trendGameList,renderTrend,expandedCard,toggleCard};
   }
 }).mount("#app");
 </script>
