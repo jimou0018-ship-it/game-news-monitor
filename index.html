@@ -364,8 +364,8 @@ createApp({
           tooltip:{formatter:function(p){
             const d=p.data;
             const sameDayAll=allEvents.filter(e=>e.action_time===d.evDate);
-            let tip='<div style="font-size:12px;max-width:320px"><b>'+d.evDate+'</b> ('+sameDayAll.length+'条动态)<hr style="margin:4px 0;border:none;border-top:1px solid #eee">';
-            sameDayAll.forEach(e=>{tip+='<div style="margin:4px 0;padding:3px 0;border-bottom:1px solid #f5f5f5"><span style="color:'+(typeColors[e.type]||"#888")+';font-weight:500">'+e.type+'</span> '+e.title+'<br/><span style="color:#999;font-size:11px">'+(e.summary||"").slice(0,50)+'</span></div>'});
+            let tip='<div style="font-size:12px;max-width:280px;word-break:break-all"><b>'+d.evDate+'</b> ('+sameDayAll.length+'条动态)<hr style="margin:4px 0;border:none;border-top:1px solid #eee">';
+            sameDayAll.forEach(e=>{tip+='<div style="margin:4px 0;padding:3px 0;border-bottom:1px solid #f5f5f5"><span style="color:'+(typeColors[e.type]||"#888")+';font-weight:500">'+e.type+'</span> '+e.title+'<br/><span style="color:#999;font-size:11px">'+(e.summary||"").slice(0,40)+'</span></div>'});
             return tip+'</div>';
           }}};
       });
