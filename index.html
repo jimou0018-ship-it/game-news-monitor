@@ -372,7 +372,7 @@ createApp({
       if(trendChartInstance)trendChartInstance.dispose();
       trendChartInstance=echarts.init(el);
       trendChartInstance.setOption({
-        tooltip:{trigger:"item",confine:true},
+        tooltip:{trigger:"item",confine:true,extraCssText:"max-width:280px;white-space:normal;word-break:break-all;overflow:hidden;"},
         legend:{data:[metric==="revenue"?"流水":"下载",...eventTypes],top:8,textStyle:{fontSize:11},selectedMode:true},
         xAxis:{type:"category",data:dates,axisLabel:{fontSize:11,formatter:v=>v.slice(5)}},
         yAxis:{type:"value",name:metric==="revenue"?"万元":"万次",axisLabel:{fontSize:11}},
