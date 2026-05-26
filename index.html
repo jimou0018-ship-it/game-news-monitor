@@ -346,10 +346,28 @@ createApp({
       const typeColors={"商业化":"#d46b08","版本更新":"#0958d9","玩法上新":"#389e0d","联动":"#c41d7f","运营活动":"#faad14","赛事":"#722ed1","市场":"#13c2c2","内容生态":"#eb2f96"};
       const allEvents=data.value.filter(d=>d.game===game&&dates.includes(d.action_time));
       const eventTypes=[...new Set(allEvents.map(e=>e.type))];
+      const dateEventCount={};
+      allEvents.forEach(ev=>{const k=ev.action_time+"_"+ev.type;dateEventCount[k]=(dateEventCount[k]||0)+1});
+      const dateTypeIdx={};
       const scatterSeries=eventTypes.map(t=>{
         const evts=allEvents.filter(e=>e.type===t);
-        const pts=evts.map(ev=>{const idx=dates.indexOf(ev.action_time);return[dates[idx],values[idx]||0,ev.title,ev.summary||""]});
-        return{name:t,type:"scatter",data:pts,symbolSize:12,itemStyle:{color:typeColors[t]||"#888"},z:10,tooltip:{formatter:function(p){return'<b style="color:'+(typeColors[p.seriesName]||"#888")+'">'+p.seriesName+'</b><br/>'+p.data[2]+'<br/><span style="color:#666;font-size:11px">'+p.data[3].slice(0,80)+'</span>'}}};
+        const pts=evts.map((ev,i)=>{
+          const idx=dates.indexOf(ev.action_time);
+          const baseVal=values[idx]||0;
+          const sameDay=allEvents.filter(e=>e.action_time===ev.action_time);
+          const posInDay=sameDay.indexOf(ev);
+          const maxVal=Math.max(...values.filter(v=>v>0))||1;
+          const jitter=(posInDay-(sameDay.length-1)/2)*maxVal*0.03;
+          return{value:[dates[idx],baseVal+jitter],evTitle:ev.title,evSummary:ev.summary||"",evType:ev.type,evDate:ev.action_time}
+        });
+        return{name:t,type:"scatter",data:pts,symbolSize:12,itemStyle:{color:typeColors[t]||"#888"},z:10,
+          tooltip:{formatter:function(p){
+            const d=p.data;
+            const sameDayAll=allEvents.filter(e=>e.action_time===d.evDate);
+            let tip='<div style="font-size:12px;max-width:320px"><b>'+d.evDate+'</b> ('+sameDayAll.length+'条动态)<hr style="margin:4px 0;border:none;border-top:1px solid #eee">';
+            sameDayAll.forEach(e=>{tip+='<div style="margin:4px 0;padding:3px 0;border-bottom:1px solid #f5f5f5"><span style="color:'+(typeColors[e.type]||"#888")+';font-weight:500">'+e.type+'</span> '+e.title+'<br/><span style="color:#999;font-size:11px">'+(e.summary||"").slice(0,50)+'</span></div>'});
+            return tip+'</div>';
+          }}};
       });
       if(trendChartInstance)trendChartInstance.dispose();
       trendChartInstance=echarts.init(el);
