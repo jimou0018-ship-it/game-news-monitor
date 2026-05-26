@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>竞品动态监控看板</title>
 <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f6f7;color:#1f2329}
@@ -87,6 +87,7 @@ td a{color:#1677ff;text-decoration:none}
       <button :class="{active:tab==='dashboard'}" @click="tab='dashboard'">看板</button>
       <button :class="{active:tab==='cards'}" @click="tab='cards'">卡片</button>
       <button :class="{active:tab==='revenue'}" @click="tab='revenue'">竞品数据</button>
+      <button :class="{active:tab==='trend'}" @click="tab='trend';$nextTick(()=>renderTrend())">趋势分析</button>
       <button :class="{active:tab==='table'}" @click="tab='table'">源数据</button>
     </div>
     <span style="margin-left:auto;font-size:12px;color:#8f959e;">数据源：微博 + Sensor Tower (est.)</span>
@@ -98,8 +99,8 @@ td a{color:#1677ff;text-decoration:none}
         <div class="stat-card" v-for="t in typeStats" :key="t.type"><div class="num" :style="{color:typeColor(t.type)}">{{t.count}}</div><div class="label">{{t.type}}</div></div>
       </div>
       <div class="chart-row">
-        <div class="chart-box"><h3>各游戏动态数量</h3><canvas id="chartGames"></canvas></div>
-        <div class="chart-box"><h3>动态类型分布</h3><canvas id="chartTypes"></canvas></div>
+        <div class="chart-box"><h3>各游戏动态数量</h3><div id="chartGames" style="height:320px"></div></div>
+        <div class="chart-box"><h3>动态类型分布</h3><div id="chartTypes" style="height:320px"></div></div>
       </div>
     </div>
     <div v-show="tab==='cards'">
@@ -207,6 +208,25 @@ td a{color:#1677ff;text-decoration:none}
       </div>
       <p style="margin-top:12px;font-size:11px;color:#8f959e;">数据口径：中国区 iOS+Android，Sensor Tower 估算值（含渠道抽成），按 1 USD = 7.2 CNY 换算。环比=对比前一个同等天数周期，同比=对比去年同期。以最后有数据日为锚点（可能存在 T-1/T-2 延迟）。</p>
     </div>
+    <div v-show="tab==='trend'">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+        <select v-model="trendGame" @change="$nextTick(()=>renderTrend())" style="padding:8px 12px;border:1px solid #e5e6eb;border-radius:6px;font-size:14px;min-width:160px">
+          <option v-for="g in trendGameList" :key="g" :value="g">{{g}}</option>
+        </select>
+        <div class="metric-toggle">
+          <button :class="{active:trendMetric==='revenue'}" @click="trendMetric='revenue';$nextTick(()=>renderTrend())">流水</button>
+          <button :class="{active:trendMetric==='download'}" @click="trendMetric='download';$nextTick(()=>renderTrend())">下载</button>
+        </div>
+        <select v-model="trendRange" @change="$nextTick(()=>renderTrend())" style="padding:8px 12px;border:1px solid #e5e6eb;border-radius:6px;font-size:13px">
+          <option value="30">近30天</option>
+          <option value="90">近90天</option>
+          <option value="180">近半年</option>
+          <option value="365">近一年</option>
+        </select>
+      </div>
+      <div id="trendChart" style="width:100%;height:420px;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06)"></div>
+      <p style="margin-top:8px;font-size:11px;color:#8f959e">曲线上的标注点为该游戏的【商业化】【版本更新】动态。鼠标悬停可查看详情。</p>
+    </div>
     <div v-show="tab==='table'">
       <div class="table-wrap">
         <div class="table-search"><input v-model="search" placeholder="搜索游戏、标题、摘要..."></div>
@@ -257,16 +277,69 @@ createApp({
       return arr;
     });
     const sortBy=(key)=>{if(sortKey.value===key)sortDir.value*=-1;else{sortKey.value=key;sortDir.value=-1}};
+    const trendGame=ref(Object.keys(TRENDS)[0]||"");
+    const trendMetric=ref("revenue");
+    const trendRange=ref("90");
+    const trendGameList=computed(()=>Object.keys(TRENDS).sort());
+    let trendChartInstance=null;
     const renderCharts=()=>{
       const gameMap={};data.value.forEach(d=>{gameMap[d.game]=(gameMap[d.game]||0)+1});
       const games=Object.entries(gameMap).sort((a,b)=>b[1]-a[1]);
-      new Chart(document.getElementById("chartGames"),{type:"bar",data:{labels:games.map(g=>g[0]),datasets:[{data:games.map(g=>g[1]),backgroundColor:"#1677ff",borderRadius:4}]},options:{indexAxis:"y",plugins:{legend:{display:false}},scales:{x:{beginAtZero:true}}}});
+      const el1=document.getElementById("chartGames");
+      if(!el1)return;
+      echarts.dispose(el1);
+      echarts.init(el1).setOption({xAxis:{type:"value"},yAxis:{type:"category",data:games.map(g=>g[0]).reverse(),axisLabel:{fontSize:11}},series:[{type:"bar",data:games.map(g=>g[1]).reverse(),itemStyle:{color:"#1677ff",borderRadius:4}}],grid:{left:100,right:20,top:10,bottom:10}});
+      const el2=document.getElementById("chartTypes");
+      echarts.dispose(el2);
       const types=typeStats.value;
-      new Chart(document.getElementById("chartTypes"),{type:"doughnut",data:{labels:types.map(t=>t.type),datasets:[{data:types.map(t=>t.count),backgroundColor:["#d46b08","#389e0d","#c41d7f","#0958d9","#595959","#13c2c2","#531dab","#722ed1"]}]},options:{plugins:{legend:{position:"bottom"}}}});
+      echarts.init(el2).setOption({series:[{type:"pie",radius:["40%","70%"],data:types.map((t,i)=>({name:t.type,value:t.count,itemStyle:{color:["#d46b08","#389e0d","#c41d7f","#0958d9","#595959","#13c2c2","#531dab","#722ed1"][i%8]}})),label:{fontSize:11}}],legend:{bottom:0,textStyle:{fontSize:11}}});
     };
-    watch(tab,(v)=>{if(v==="dashboard")nextTick(renderCharts)});
+    const renderTrend=()=>{
+      const el=document.getElementById("trendChart");
+      if(!el)return;
+      const game=trendGame.value;
+      const metric=trendMetric.value;
+      const rangeDays=parseInt(trendRange.value);
+      const tData=TRENDS[game];
+      if(!tData)return;
+      const daily=tData[metric]||[];
+      const sliced=daily.slice(-rangeDays);
+      const dates=sliced.map(d=>d.date);
+      const values=sliced.map(d=>metric==="revenue"?Math.round(d.value*7.2/10000):Math.round(d.value/10000));
+      const events=data.value.filter(d=>d.game===game&&(d.type==="商业化"||d.type==="版本更新")&&dates.includes(d.action_time));
+      const markData=events.map(ev=>{const idx=dates.indexOf(ev.action_time);return{coord:[idx,values[idx]||0],name:ev.title,itemStyle:{color:ev.type==="商业化"?"#d46b08":"#0958d9"},symbolSize:10}});
+      if(trendChartInstance)trendChartInstance.dispose();
+      trendChartInstance=echarts.init(el);
+      trendChartInstance.setOption({
+        tooltip:{trigger:"axis",axisPointer:{type:"cross"},formatter:function(params){
+          let tip=params[0].axisValue+"<br/>";
+          params.forEach(p=>{tip+=p.marker+(metric==="revenue"?p.value.toLocaleString()+"万元":p.value.toLocaleString()+"万次")+"<br/>"});
+          const evts=events.filter(e=>e.action_time===params[0].axisValue);
+          evts.forEach(e=>{tip+='<div style="margin-top:4px;padding:4px 8px;background:'+(e.type==="商业化"?"#fff7e6":"#e6f4ff")+';border-radius:4px;font-size:11px"><b>'+e.type+'</b> '+e.title+'<br/><span style="color:#666">'+((e.summary||"").slice(0,60))+'</span></div>'});
+          return tip;
+        }},
+        xAxis:{type:"category",data:dates,axisLabel:{fontSize:11,formatter:v=>v.slice(5)}},
+        yAxis:{type:"value",name:metric==="revenue"?"万元":"万次",axisLabel:{fontSize:11}},
+        series:[{
+          type:"line",smooth:true,data:values,
+          lineStyle:{color:metric==="revenue"?"#d46b08":"#1677ff",width:2},
+          areaStyle:{color:metric==="revenue"?"rgba(212,107,8,0.08)":"rgba(22,119,255,0.08)"},
+          itemStyle:{color:metric==="revenue"?"#d46b08":"#1677ff"},
+          symbolSize:0,
+          markPoint:{
+            data:markData,
+            symbol:"circle",
+            label:{show:false},
+            tooltip:{formatter:function(p){const ev=events.find(e=>e.title===p.name);return ev?'<b>'+ev.type+'</b><br/>'+ev.title+'<br/><span style="color:#666;font-size:11px">'+(ev.summary||"").slice(0,80)+'</span>':p.name}}
+          }
+        }],
+        grid:{left:60,right:20,top:40,bottom:40},
+        dataZoom:[{type:"inside",start:0,end:100}]
+      });
+    };
+    watch(tab,(v)=>{if(v==="dashboard")nextTick(renderCharts);if(v==="trend")nextTick(renderTrend)});
     onMounted(()=>nextTick(renderCharts));
-    return {data,tab,search,sortKey,sortDir,filterStart,filterEnd,filterGames,filterTypes,allGames,allTypes,gamesByCategory,typeStats,typeCountMap,catCount,isCatChecked,toggleCategory,typeColor,typeTagClass,filteredData,tableData,sortBy,revStats,dlStats,sortedRevStats,sortedDlStats,revSortKey,dlSortKey,showChange,fmtNum,fmtPct,pctClass};
+    return {data,tab,search,sortKey,sortDir,filterStart,filterEnd,filterGames,filterTypes,allGames,allTypes,gamesByCategory,typeStats,typeCountMap,catCount,isCatChecked,toggleCategory,typeColor,typeTagClass,filteredData,tableData,sortBy,revStats,dlStats,sortedRevStats,sortedDlStats,revSortKey,dlSortKey,showChange,fmtNum,fmtPct,pctClass,trendGame,trendMetric,trendRange,trendGameList,renderTrend};
   }
 }).mount("#app");
 </script>
