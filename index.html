@@ -166,7 +166,7 @@ td a{color:#1677ff;text-decoration:none}
     <div v-show="tab==='cards'">
       <div class="cards-layout">
         <div class="sidebar"><div class="filter-section"><h4>日期</h4><input type="date" v-model="filterStart"><input type="date" v-model="filterEnd"></div><div class="filter-section"><h4>品类 / 游戏</h4><template v-for="(games, cat) in gamesByCategory" :key="cat"><label class="cat-label"><input type="checkbox" :checked="isCatChecked(cat)" @change="toggleCategory(cat,$event)">{{cat}}<span class="count-badge">{{catCount(cat)}}</span></label><label class="game-label" v-for="g in games" :key="g"><input type="checkbox" :value="g" v-model="filterGames">{{g}}</label></template></div></div>
-        <div class="sidebar"><div class="filter-section"><h4>动态类型</h4><label v-for="t in allTypes" :key="t"><input type="checkbox" :value="t" v-model="filterTypes">{{t}}<span class="count-badge">{{typeCountMap[t]}}</span></label></div></div>
+        <div class="sidebar"><div class="filter-section"><h4>动态类型</h4><label v-for="t in allTypes" :key="t"><input type="checkbox" :value="t" v-model="filterTypes">{{t}}<span class="count-badge">{{typeCountMap[t]}}</span></label></div><div class="filter-section"><h4>状态</h4><label><input type="checkbox" value="happened" v-model="filterStatus">已发生</label><label><input type="checkbox" value="upcoming" v-model="filterStatus">未发生</label></div></div>
         <div class="cards-grid">
           <div class="card" v-for="d in filteredData" :key="d.id" :style="{borderLeftColor:typeColor(d.type)}" @click="toggleCard(d)">
             <div class="tags"><span class="tag tag-game">{{d.game}}</span><span class="tag" :class="typeTagClass(d.type)">{{d.type}}</span><span v-if="!isHappened(d)" class="tag" style="background:#f0f1f2;color:#8f959e">未发生</span></div>
@@ -198,7 +198,7 @@ const USD2CNY=7.2;
 const {createApp,ref,computed,onMounted,nextTick,watch}=Vue;
 createApp({setup(){
   const data=ref(DATA),tab=ref("revenue"),search=ref(""),sortKey=ref("action_time"),sortDir=ref(-1);
-  const filterStart=ref(""),filterEnd=ref(""),filterGames=ref([]),filterTypes=ref([]);
+  const filterStart=ref(""),filterEnd=ref(""),filterGames=ref([]),filterTypes=ref([]),filterStatus=ref([]);
   const revSortKey=ref("val_30d"),dlSortKey=ref("val_30d"),showChange=ref(false);
   const revChartPeriod=ref("7d"),dlChartPeriod=ref("7d");
   const revStats=ref(REV_STATS),dlStats=ref(DL_STATS);
@@ -214,7 +214,7 @@ createApp({setup(){
   const toggleCategory=(cat,ev)=>{const games=gamesByCategory.value[cat]||[];if(ev.target.checked)games.forEach(g=>{if(!filterGames.value.includes(g))filterGames.value.push(g)});else filterGames.value=filterGames.value.filter(g=>!games.includes(g))};
   const typeColor=(t)=>({"版本更新":"#0958d9","商业化":"#d46b08","玩法上新":"#389e0d","赛事":"#531dab","联动":"#c41d7f","运营活动":"#595959","市场":"#13c2c2","内容生态":"#722ed1"}[t]||"#1677ff");
   const typeTagClass=(t)=>({"版本更新":"tag-version","商业化":"tag-commerce","玩法上新":"tag-gameplay","赛事":"tag-esport","联动":"tag-collab","运营活动":"tag-ops","市场":"tag-market","内容生态":"tag-content"}[t]||"");
-  const filteredData=computed(()=>data.value.filter(d=>{if(filterGames.value.length&&!filterGames.value.includes(d.game))return false;if(filterTypes.value.length&&!filterTypes.value.includes(d.type))return false;if(filterStart.value&&d.action_time<filterStart.value)return false;if(filterEnd.value&&d.action_time>filterEnd.value)return false;return true}));
+  const filteredData=computed(()=>data.value.filter(d=>{if(filterGames.value.length&&!filterGames.value.includes(d.game))return false;if(filterTypes.value.length&&!filterTypes.value.includes(d.type))return false;if(filterStart.value&&d.action_time<filterStart.value)return false;if(filterEnd.value&&d.action_time>filterEnd.value)return false;if(filterStatus.value.length){const h=d.action_time<=today;if(filterStatus.value.length===1){if(filterStatus.value[0]==="happened"&&!h)return false;if(filterStatus.value[0]==="upcoming"&&h)return false}}return true}));
   const sortedRevStats=computed(()=>[...revStats.value].sort((a,b)=>b[revSortKey.value]-a[revSortKey.value]));
   const sortedDlStats=computed(()=>[...dlStats.value].sort((a,b)=>b[dlSortKey.value]-a[dlSortKey.value]));
   const fmtNum=(n)=>n!=null?n.toLocaleString("zh-CN",{minimumFractionDigits:1,maximumFractionDigits:1}):"-";
@@ -280,7 +280,7 @@ createApp({setup(){
   const renderMiniChart=(d)=>{const el=document.getElementById("miniChart_"+d.id);if(!el)return;const tData=TRENDS[d.game];if(!tData)return;const daily=(tData["revenue"]||[]).slice(-60);const dates=daily.map(x=>x.date);const values=daily.map(x=>Math.round(x.value*USD2CNY/10000));const allEv=data.value.filter(e=>e.game===d.game&&dates.includes(e.action_time)&&e.action_time<=today);const sc=allEv.map(ev=>{const cur=ev.id===d.id;return{value:[ev.action_time,values[dates.indexOf(ev.action_time)]||0],itemStyle:{color:cur?"#e24b4a":"#bbb"},symbolSize:cur?14:7,name:ev.title,summary:ev.summary||""}});echarts.dispose(el);echarts.init(el).setOption({tooltip:{trigger:"item",confine:true,formatter:function(p){if(p.seriesType==="scatter")return"<b>"+p.data.name+"</b><br/>"+(p.data.summary||"").slice(0,50);return p.name+"<br/>"+p.value.toLocaleString()+"万元"}},xAxis:{type:"category",data:dates,axisLabel:{fontSize:10,formatter:v=>v.slice(5)}},yAxis:{type:"value",axisLabel:{fontSize:10},splitNumber:3},series:[{type:"line",data:values,smooth:true,lineStyle:{color:"#333",width:1.5},areaStyle:{color:"rgba(0,0,0,0.03)"},itemStyle:{color:"#333"},symbolSize:0},{type:"scatter",data:sc,z:10}],grid:{left:45,right:10,top:10,bottom:28}});};;
   watch(tab,v=>{if(v==="revenue")nextTick(renderRevCharts);if(v==="trend")nextTick(renderTrend)});
   onMounted(()=>nextTick(renderRevCharts));
-  return{data,tab,search,sortKey,sortDir,filterStart,filterEnd,filterGames,filterTypes,allTypes,gamesByCategory,typeCountMap,catCount,isCatChecked,toggleCategory,typeColor,typeTagClass,filteredData,sortedRevStats,sortedDlStats,revSortKey,dlSortKey,showChange,revChartPeriod,dlChartPeriod,fmtNum,fmtPct,pctClass,tableData,sortBy,trendGame,trendRange,trendGameList,trendRevStat,trendDlStat,renderTrend,renderRevCharts,expandedCard,toggleCard,isHappened};
+  return{data,tab,search,sortKey,sortDir,filterStart,filterEnd,filterGames,filterTypes,filterStatus,allTypes,gamesByCategory,typeCountMap,catCount,isCatChecked,toggleCategory,typeColor,typeTagClass,filteredData,sortedRevStats,sortedDlStats,revSortKey,dlSortKey,showChange,revChartPeriod,dlChartPeriod,fmtNum,fmtPct,pctClass,tableData,sortBy,trendGame,trendRange,trendGameList,trendRevStat,trendDlStat,renderTrend,renderRevCharts,expandedCard,toggleCard,isHappened};
 }}).mount("#app");
 </script>
 </body>
