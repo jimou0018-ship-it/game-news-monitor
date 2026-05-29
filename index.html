@@ -92,16 +92,20 @@ td a{color:#1677ff;text-decoration:none}
   <div class="container">
     <!-- 今日更新动态 -->
     <div v-show="tab==='today'">
-      <div style="margin-bottom:16px;font-size:14px;color:#646a73">最近一次更新入库的动态（{{todayData.length}} 条）</div>
-      <div class="cards-grid">
-        <div class="card" v-for="d in todayData" :key="d.id" :style="{borderLeftColor:typeColor(d.type)}" @click="toggleCard(d)">
-          <div class="tags"><span class="tag tag-game">{{d.game}}</span><span class="tag" :class="typeTagClass(d.type)">{{d.type}}</span><span v-if="!isHappened(d)" class="tag" style="background:#f0f1f2;color:#8f959e">未发生</span></div>
-          <div class="title">{{d.title}}</div>
-          <div class="summary">{{d.summary}}</div>
-          <div class="meta"><span>{{d.action_time}}</span><a :href="d.source_url" target="_blank" v-if="d.source_url" @click.stop>原文</a></div>
-          <div v-if="expandedCard===d.id&&isHappened(d)" style="margin-top:12px;border-top:1px solid #f0f1f2;padding-top:12px"><div :id="'miniChart_'+d.id" style="width:100%;height:180px"></div></div>
+      <div style="margin-bottom:16px;font-size:14px;color:#646a73">最近一次更新入库的动态（{{todayFilteredData.length}} 条）</div>
+      <div class="cards-layout">
+        <div class="sidebar"><div class="filter-section"><h4>品类 / 游戏</h4><template v-for="(games, cat) in todayGamesByCategory" :key="cat"><label class="cat-label"><input type="checkbox" :checked="isTodayCatChecked(cat)" @change="toggleTodayCategory(cat,$event)">{{cat}}</label><label class="game-label" v-for="g in games" :key="g"><input type="checkbox" :value="g" v-model="todayFilterGames">{{g}}</label></template></div></div>
+        <div class="sidebar"><div class="filter-section"><h4>动态类型</h4><label v-for="t in todayTypes" :key="t"><input type="checkbox" :value="t" v-model="todayFilterTypes">{{t}}</label></div><div class="filter-section"><h4>状态</h4><label><input type="checkbox" value="happened" v-model="todayFilterStatus">已发生</label><label><input type="checkbox" value="upcoming" v-model="todayFilterStatus">未发生</label></div></div>
+        <div class="cards-grid">
+          <div class="card" v-for="d in todayFilteredData" :key="d.id" :style="{borderLeftColor:typeColor(d.type)}" @click="toggleCard(d)">
+            <div class="tags"><span class="tag tag-game">{{d.game}}</span><span class="tag" :class="typeTagClass(d.type)">{{d.type}}</span><span v-if="!isHappened(d)" class="tag" style="background:#f0f1f2;color:#8f959e">未发生</span></div>
+            <div class="title">{{d.title}}</div>
+            <div class="summary">{{d.summary}}</div>
+            <div class="meta"><span>{{d.action_time}}</span><a :href="d.source_url" target="_blank" v-if="d.source_url" @click.stop>原文</a></div>
+            <div v-if="expandedCard===d.id&&isHappened(d)" style="margin-top:12px;border-top:1px solid #f0f1f2;padding-top:12px"><div :id="'miniChart_'+d.id" style="width:100%;height:180px"></div></div>
+          </div>
+          <div class="empty" v-if="!todayFilteredData.length">今日暂无匹配的动态</div>
         </div>
-        <div class="empty" v-if="!todayData.length">今日暂无新增动态</div>
       </div>
     </div>
     <!-- 竞品数据 -->
@@ -293,12 +297,18 @@ createApp({setup(){
   const today=new Date().toISOString().slice(0,10);
   const latestCreatedAt=computed(()=>{const dates=data.value.map(d=>(d.created_at||"").slice(0,10)).filter(d=>d);return dates.length?dates.sort().pop():""});
   const todayData=computed(()=>data.value.filter(d=>(d.created_at||"").slice(0,10)===latestCreatedAt.value));
+  const todayFilterGames=ref([]),todayFilterTypes=ref([]),todayFilterStatus=ref([]);
+  const todayGamesByCategory=computed(()=>{const m={};todayData.value.forEach(d=>{if(!m[d.category])m[d.category]=new Set();m[d.category].add(d.game)});const r={};["MMO","派对社交","大DAU","换装","年轻用户"].forEach(cat=>{if(m[cat])r[cat]=[...m[cat]].sort()});return r});
+  const todayTypes=computed(()=>[...new Set(todayData.value.map(d=>d.type))]);
+  const isTodayCatChecked=(cat)=>{const games=todayGamesByCategory.value[cat]||[];return games.length>0&&games.every(g=>todayFilterGames.value.includes(g))};
+  const toggleTodayCategory=(cat,ev)=>{const games=todayGamesByCategory.value[cat]||[];if(ev.target.checked)games.forEach(g=>{if(!todayFilterGames.value.includes(g))todayFilterGames.value.push(g)});else todayFilterGames.value=todayFilterGames.value.filter(g=>!games.includes(g))};
+  const todayFilteredData=computed(()=>todayData.value.filter(d=>{if(todayFilterGames.value.length&&!todayFilterGames.value.includes(d.game))return false;if(todayFilterTypes.value.length&&!todayFilterTypes.value.includes(d.type))return false;if(todayFilterStatus.value.length){const h=d.action_time<=today;if(todayFilterStatus.value.length===1){if(todayFilterStatus.value[0]==="happened"&&!h)return false;if(todayFilterStatus.value[0]==="upcoming"&&h)return false}}return true}));
   const isHappened=(d)=>d.action_time<=today;
   const toggleCard=(d)=>{if(!isHappened(d))return;if(expandedCard.value===d.id){expandedCard.value=null;return}expandedCard.value=d.id;nextTick(()=>renderMiniChart(d))};
   const renderMiniChart=(d)=>{const el=document.getElementById("miniChart_"+d.id);if(!el)return;const tData=TRENDS[d.game];if(!tData)return;let daily=(tData["revenue"]||[]).slice(-60);while(daily.length>1&&(!daily[daily.length-1].value||daily[daily.length-1].value===0))daily.pop();const dates=daily.map(x=>x.date);const values=daily.map(x=>Math.round(x.value*USD2CNY/10000));const allEv=data.value.filter(e=>e.game===d.game&&dates.includes(e.action_time)&&e.action_time<=today);const maxV=Math.max(...values.filter(v=>v>0))||1;const sc=allEv.map(ev=>{const cur=ev.id===d.id;const sameDay=allEv.filter(e=>e.action_time===ev.action_time);const pos=sameDay.indexOf(ev);const jit=(pos-(sameDay.length-1)/2)*maxV*0.03;const baseVal=values[dates.indexOf(ev.action_time)]||0;return{value:[ev.action_time,baseVal+jit],itemStyle:{color:cur?"#e24b4a":"#bbb"},symbolSize:cur?14:7,name:ev.title,summary:ev.summary||"",evDate:ev.action_time}});echarts.dispose(el);echarts.init(el).setOption({tooltip:{trigger:"axis",confine:true,extraCssText:"max-width:260px;white-space:normal;word-break:break-all;",formatter:function(params){const date=params[0].axisValue;const lineP=params.find(p=>p.seriesType==="line");let tip="<b>"+date+"</b><br/>";if(lineP)tip+=lineP.value.toLocaleString()+" 万元<br/>";const dayEvts=allEv.filter(e=>e.action_time===date);if(dayEvts.length){tip+='<hr style="margin:4px 0;border:none;border-top:1px solid #eee">';dayEvts.forEach(e=>{const cur2=e.id===d.id;tip+='<div style="margin:2px 0;'+(cur2?"font-weight:500;color:#e24b4a":"color:#666")+'">'+e.title+'</div>'})}return tip}},xAxis:{type:"category",data:dates,axisLabel:{fontSize:10,formatter:v=>v.slice(5)},axisPointer:{show:true}},yAxis:{type:"value",axisLabel:{fontSize:10},splitNumber:3},series:[{type:"line",data:values,smooth:true,lineStyle:{color:"#333",width:1.5},areaStyle:{color:"rgba(0,0,0,0.03)"},itemStyle:{color:"#333"},symbolSize:0},{type:"scatter",data:sc,z:10}],grid:{left:45,right:10,top:10,bottom:28}});};;
   watch(tab,v=>{if(v==="revenue")nextTick(renderRevCharts);if(v==="trend")nextTick(renderTrend)});
   onMounted(()=>nextTick(renderRevCharts));
-  return{data,tab,search,sortKey,sortDir,filterStart,filterEnd,filterGames,filterTypes,filterStatus,allTypes,gamesByCategory,typeCountMap,catCount,isCatChecked,toggleCategory,typeColor,typeTagClass,filteredData,sortedRevStats,sortedDlStats,revSortKey,dlSortKey,showChange,revChartPeriod,dlChartPeriod,fmtNum,fmtPct,pctClass,tableData,sortBy,trendGame,trendRange,trendGameList,trendRevStat,trendDlStat,renderTrend,renderRevCharts,expandedCard,toggleCard,isHappened,todayData};
+  return{data,tab,search,sortKey,sortDir,filterStart,filterEnd,filterGames,filterTypes,filterStatus,allTypes,gamesByCategory,typeCountMap,catCount,isCatChecked,toggleCategory,typeColor,typeTagClass,filteredData,sortedRevStats,sortedDlStats,revSortKey,dlSortKey,showChange,revChartPeriod,dlChartPeriod,fmtNum,fmtPct,pctClass,tableData,sortBy,trendGame,trendRange,trendGameList,trendRevStat,trendDlStat,renderTrend,renderRevCharts,expandedCard,toggleCard,isHappened,todayData,todayFilteredData,todayFilterGames,todayFilterTypes,todayFilterStatus,todayGamesByCategory,todayTypes,isTodayCatChecked,toggleTodayCategory};
 }}).mount("#app");
 </script>
 </body>
