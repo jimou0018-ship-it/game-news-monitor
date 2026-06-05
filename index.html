@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>竞品动态监控</title>
+<title>市场动态监控平台</title>
 <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 <style>
@@ -79,7 +79,7 @@ td a{color:#1677ff;text-decoration:none}
 <body>
 <div id="app">
   <div class="header">
-    <h1>竞品动态监控</h1>
+    <h1>市场动态监控平台</h1>
     <div class="tabs">
       <button :class="{active:tab==='today'}" @click="tab='today'">今日更新动态</button>
       <button :class="{active:tab==='revenue'}" @click="tab='revenue';$nextTick(()=>renderRevCharts())">竞品数据</button>
