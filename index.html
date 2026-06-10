@@ -30,8 +30,7 @@ body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;backgr
 .card{background:#fff;border-radius:8px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06);cursor:pointer;transition:box-shadow .2s;border-left:4px solid #1677ff}
 .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.1)}
 .card .tags{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
-.trend-detail-card{background:#f7f8fa;border:1px solid #d6d9de;border-radius:10px;padding:18px 20px;margin-top:10px;animation:slideDown .2s ease}
-@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.trend-detail-card{background:#f7f8fa;border:1px solid #e5e6eb;border-radius:10px;padding:16px 18px;margin-top:10px;min-height:60px}
 .tag{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500}
 .tag-game{background:#e8f3ff;color:#1677ff}
 .tag-version{background:#e6f4ff;color:#0958d9}
@@ -193,20 +192,28 @@ td a{color:#1677ff;text-decoration:none}
           </div>
         </div>
       </template>
-      <div v-if="trendDetail" class="trend-detail-card">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start">
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <span class="tag tag-game">{{trendDetail.evGame}}</span>
-            <span class="tag" :class="typeTagClass(trendDetail.evType)">{{trendDetail.evType}}</span>
-            <span style="color:#8f959e;font-size:12px">{{trendDetail.evDate}}</span>
+      <div class="trend-detail-card">
+        <template v-if="trendDetailDate&&trendDetailGame">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="display:flex;gap:8px;align-items:center">
+              <span class="tag tag-game" style="font-size:12px;padding:3px 10px">{{trendDetailGame}}</span>
+              <span style="color:#646a73;font-size:13px;font-weight:500">{{trendDetailDate}}</span>
+              <span style="color:#8f959e;font-size:12px">{{trendDetailEvents.length}} 条动态</span>
+            </div>
+            <button @click="trendDetailDate=null" style="background:none;border:none;font-size:18px;cursor:pointer;color:#8f959e;padding:0;line-height:1">&times;</button>
           </div>
-          <button @click="trendDetail=null" style="background:none;border:none;font-size:18px;cursor:pointer;color:#8f959e;padding:0;line-height:1">&times;</button>
-        </div>
-        <div style="font-weight:500;font-size:15px;margin-top:10px;margin-bottom:8px">{{trendDetail.evTitle}}</div>
-        <div style="color:#646a73;font-size:13px;line-height:1.7;margin-bottom:12px">{{trendDetail.evSummary}}</div>
-        <a :href="trendDetail.evUrl" target="_blank" v-if="trendDetail.evUrl" style="display:inline-block;color:#1677ff;text-decoration:none;font-size:13px;padding:6px 14px;border:1px solid #1677ff;border-radius:6px;transition:all .2s" onmouseover="this.style.background='#1677ff';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='#1677ff'">查看原文 &rarr;</a>
+          <div v-for="(ev,i) in trendDetailEvents" :key="ev.id" :style="{borderTop:i>0?'1px solid #e5e6eb':'none',paddingTop:i>0?'14px':'0',marginTop:i>0?'8px':'0'}">
+            <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+              <span class="tag" :class="typeTagClass(ev.type)" style="padding:2px 7px;font-size:10px">{{ev.type}}</span>
+            </div>
+            <div style="font-weight:500;font-size:14px;margin-bottom:4px">{{ev.title}}</div>
+            <div style="color:#646a73;font-size:13px;line-height:1.6;margin-bottom:6px">{{ev.summary}}</div>
+            <a :href="ev.source_url" target="_blank" v-if="ev.source_url" style="display:inline-block;color:#1677ff;text-decoration:none;font-size:12px" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">查看原文 &rarr;</a>
+          </div>
+        </template>
+        <div v-else style="text-align:center;color:#8f959e;font-size:13px;padding:20px 0">💡 点击散点展示动态详情</div>
       </div>
-      <p style="font-size:11px;color:#8f959e;margin-top:8px">标注点为该游戏的各类动态事件。点击散点查看详情与原文链接。点击图例可显示/隐藏类型。</p>
+      <p style="font-size:11px;color:#8f959e;margin-top:8px">标注点为该游戏的各类动态事件。点击散点查看当日全部动态详情与原文链接。点击图例可显示/隐藏类型。</p>
     </div>
     <!-- 动态卡片 -->
     <div v-show="tab==='cards'">
@@ -255,8 +262,9 @@ createApp({setup(){
   const trendRange=ref("90");
   const trendDlExpanded=ref([false,false,false]);
   const expandedCard=ref(null);
-  const trendDetail=ref(null);
+  const trendDetailDate=ref(null);
   const trendDetailGame=ref(null);
+  const trendDetailEvents=computed(()=>{if(!trendDetailDate.value||!trendDetailGame.value)return[];return data.value.filter(d=>d.game===trendDetailGame.value&&d.action_time===trendDetailDate.value)});
   const trendGameList=computed(()=>Object.keys(TRENDS).sort());
   const allTypes=computed(()=>{const order=["商业化","玩法上新","联动","版本更新","运营活动","市场","赛事","内容生态"];const s=new Set(data.value.map(d=>d.type));return order.filter(t=>s.has(t))});
   const gamesByCategory=computed(()=>{const catOrder=["MMO","派对社交","大DAU","换装","年轻用户","其他热门产品"];const m={};data.value.forEach(d=>{if(!m[d.category])m[d.category]=new Set();m[d.category].add(d.game)});const r={};catOrder.forEach(cat=>{if(m[cat])r[cat]=[...m[cat]].sort()});return r});
@@ -325,7 +333,7 @@ createApp({setup(){
       dataZoom:[{type:"inside"}]
     });
     trendChartInstances[elId].off("click");
-    trendChartInstances[elId].on("click",function(params){if(params.seriesType==="scatter"&&params.data){trendDetail.value=params.data;trendDetailGame.value=game}});
+    trendChartInstances[elId].on("click",function(params){if(params.seriesType==="scatter"&&params.data){trendDetailDate.value=params.data.evDate;trendDetailGame.value=game}});
   };
   const renderTrend=()=>{trendGames.value.forEach((g,i)=>{buildOneChart("trendRevChart_"+i,g,"revenue")});};
   const renderTrendDl=(gi)=>{buildOneChart("trendDlChart_"+gi,trendGames.value[gi],"download")};
@@ -344,7 +352,7 @@ createApp({setup(){
   const renderMiniChart=(d)=>{const el=document.getElementById("miniChart_"+d.id);if(!el)return;const tData=TRENDS[d.game];if(!tData){el.innerHTML='<div style="text-align:center;color:#8f959e;padding:40px 0;font-size:13px">PC端游/海外产品，数据源缺失</div>';return}let daily=(tData["revenue"]||[]).slice(-60);while(daily.length>1&&(!daily[daily.length-1].value||daily[daily.length-1].value===0))daily.pop();if(!daily.length){el.innerHTML='<div style="text-align:center;color:#8f959e;padding:40px 0;font-size:13px">PC端游/海外产品，数据源缺失</div>';return}const dates=daily.map(x=>x.date);const values=daily.map(x=>Math.round(x.value*USD2CNY/10000));const allEv=data.value.filter(e=>e.game===d.game&&dates.includes(e.action_time)&&e.action_time<=today);const maxV=Math.max(...values.filter(v=>v>0))||1;const sc=allEv.map(ev=>{const cur=ev.id===d.id;const sameDay=allEv.filter(e=>e.action_time===ev.action_time);const pos=sameDay.indexOf(ev);const jit=(pos-(sameDay.length-1)/2)*maxV*0.03;const baseVal=values[dates.indexOf(ev.action_time)]||0;return{value:[ev.action_time,baseVal+jit],itemStyle:{color:cur?"#e24b4a":"#bbb"},symbolSize:cur?14:7,name:ev.title,summary:ev.summary||"",evDate:ev.action_time}});echarts.dispose(el);echarts.init(el).setOption({tooltip:{trigger:"axis",confine:true,extraCssText:"max-width:260px;white-space:normal;word-break:break-all;",formatter:function(params){const date=params[0].axisValue;const lineP=params.find(p=>p.seriesType==="line");let tip="<b>"+date+"</b><br/>";if(lineP)tip+=lineP.value.toLocaleString()+" 万元<br/>";const dayEvts=allEv.filter(e=>e.action_time===date);if(dayEvts.length){tip+='<hr style="margin:4px 0;border:none;border-top:1px solid #eee">';dayEvts.forEach(e=>{const cur2=e.id===d.id;tip+='<div style="margin:2px 0;'+(cur2?"font-weight:500;color:#e24b4a":"color:#666")+'">'+e.title+'</div>'})}return tip}},xAxis:{type:"category",data:dates,axisLabel:{fontSize:10,formatter:v=>v.slice(5)},axisPointer:{show:true}},yAxis:{type:"value",axisLabel:{fontSize:10},splitNumber:3},series:[{type:"line",data:values,smooth:true,lineStyle:{color:"#333",width:1.5},areaStyle:{color:"rgba(0,0,0,0.03)"},itemStyle:{color:"#333"},symbolSize:0},{type:"scatter",data:sc,z:10}],grid:{left:45,right:10,top:10,bottom:28}});};;
   watch(tab,v=>{if(v==="revenue")nextTick(renderRevCharts);if(v==="trend")nextTick(renderTrend)});
   onMounted(()=>nextTick(renderRevCharts));
-  return{data,tab,search,sortKey,sortDir,filterStart,filterEnd,filterGames,filterTypes,filterStatus,allTypes,gamesByCategory,typeCountMap,catCount,isCatChecked,toggleCategory,typeColor,typeTagClass,filteredData,sortedRevStats,sortedDlStats,revSortKey,dlSortKey,showChange,revChartPeriod,dlChartPeriod,fmtNum,fmtPct,pctClass,tableData,sortBy,trendGames,trendRange,trendGameList,trendDlExpanded,getTrendStat,renderTrend,renderTrendDl,renderRevCharts,expandedCard,trendDetail,trendDetailGame,toggleCard,isHappened,hasTrend,todayData,todayFilteredData,todayFilterGames,todayFilterTypes,todayFilterStatus,todayGamesByCategory,todayTypes,isTodayCatChecked,toggleTodayCategory};
+  return{data,tab,search,sortKey,sortDir,filterStart,filterEnd,filterGames,filterTypes,filterStatus,allTypes,gamesByCategory,typeCountMap,catCount,isCatChecked,toggleCategory,typeColor,typeTagClass,filteredData,sortedRevStats,sortedDlStats,revSortKey,dlSortKey,showChange,revChartPeriod,dlChartPeriod,fmtNum,fmtPct,pctClass,tableData,sortBy,trendGames,trendRange,trendGameList,trendDlExpanded,getTrendStat,renderTrend,renderTrendDl,renderRevCharts,expandedCard,trendDetailDate,trendDetailGame,trendDetailEvents,toggleCard,isHappened,hasTrend,todayData,todayFilteredData,todayFilterGames,todayFilterTypes,todayFilterStatus,todayGamesByCategory,todayTypes,isTodayCatChecked,toggleTodayCategory};
 }}).mount("#app");
 </script>
 </body>
