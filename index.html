@@ -87,6 +87,8 @@ td a{color:#1677ff;text-decoration:none}
       <button :class="{active:tab==='trend'}" @click="tab='trend';$nextTick(()=>renderTrend())">动态时轴图</button>
       <button :class="{active:tab==='cards'}" @click="tab='cards'">动态卡片</button>
       <button :class="{active:tab==='table'}" @click="tab='table'">源数据</button>
+      <button :class="{active:tab==='monthly'}" @click="tab='monthly'" style="color:#d46b08;font-weight:600;border-bottom:2px solid #d46b08" v-if="false">📊 月报</button>
+      <button :class="{active:tab==='monthly'}" @click="tab='monthly'" style="color:#d46b08;font-weight:500">📊 月报</button>
     </div>
     <span style="margin-left:auto;font-size:12px;color:#8f959e;">数据源：微博 + Sensor Tower (est.)</span>
   </div>
@@ -242,6 +244,10 @@ td a{color:#1677ff;text-decoration:none}
         <table><thead><tr><th @click="sortBy('game')">游戏</th><th @click="sortBy('category')">品类</th><th @click="sortBy('title')">标题</th><th @click="sortBy('type')">类型</th><th @click="sortBy('action_time')">时间</th><th>摘要</th><th>链接</th></tr></thead>
         <tbody><tr v-for="d in tableData" :key="d.id"><td>{{d.game}}</td><td>{{d.category}}</td><td :title="d.title" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{d.title}}</td><td><span class="tag" :class="typeTagClass(d.type)">{{d.type}}</span></td><td style="white-space:nowrap">{{d.action_time}}</td><td :title="d.summary" style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{d.summary}}</td><td><a :href="d.source_url" target="_blank" v-if="d.source_url">原文</a></td></tr></tbody></table>
       </div>
+    </div>
+    <!-- 月报 -->
+    <div v-show="tab==='monthly'" style="padding:0">
+      <iframe src="monthly_report.html" style="width:100%;height:calc(100vh - 80px);border:none;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08)" title="竞品30日月报"></iframe>
     </div>
   </div>
 </div>
