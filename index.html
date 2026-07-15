@@ -257,8 +257,8 @@ td a{color:#1677ff;text-decoration:none}
         <span style="font-size:12px;color:#8f959e;margin-left:auto" v-if="monthlySub==='auto'">最近30天自动刷新</span>
         <span style="font-size:12px;color:#8f959e;margin-left:auto" v-if="monthlySub==='refined'">人工精修，不自动刷新</span>
       </div>
-      <iframe v-if="monthlySub==='auto'" src="monthly_report.html" style="width:100%;height:calc(100vh - 130px);border:none;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08)" title="自动月报-最近30天"></iframe>
-      <iframe v-if="monthlySub==='refined'" src="monthly_report_refined.html" style="width:100%;height:calc(100vh - 130px);border:none;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08)" title="精修月报"></iframe>
+      <iframe v-if="monthlySub==='auto'" src="monthly_report.html?v=20260715" style="width:100%;height:calc(100vh - 130px);border:none;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08)" title="自动月报-最近30天"></iframe>
+      <iframe v-if="monthlySub==='refined'" src="monthly_report_refined.html?v=20260715" style="width:100%;height:calc(100vh - 130px);border:none;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08)" title="精修月报"></iframe>
     </div>
   </div>
 </div>
