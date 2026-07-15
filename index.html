@@ -251,7 +251,14 @@ td a{color:#1677ff;text-decoration:none}
     </div>
     <!-- 月报 -->
     <div v-show="tab==='monthly'" style="padding:0">
-      <iframe src="monthly_report.html" style="width:100%;height:calc(100vh - 80px);border:none;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08)" title="竞品30日月报"></iframe>
+      <div style="display:flex;gap:12px;margin-bottom:12px;align-items:center">
+        <button @click="monthlySub='auto'" :style="monthlySub==='auto'?{padding:'8px 20px',border:'1px solid #d46b08',background:'#fff7e6',borderRadius:'8px',cursor:'pointer',fontWeight:'600',color:'#d46b08'}:{padding:'8px 20px',border:'1px solid #ddd',background:'#fff',borderRadius:'8px',cursor:'pointer',fontWeight:'400',color:'#646a73'}">🤖 自动月报</button>
+        <button @click="monthlySub='refined'" :style="monthlySub==='refined'?{padding:'8px 20px',border:'1px solid #d46b08',background:'#fff7e6',borderRadius:'8px',cursor:'pointer',fontWeight:'600',color:'#d46b08'}:{padding:'8px 20px',border:'1px solid #ddd',background:'#fff',borderRadius:'8px',cursor:'pointer',fontWeight:'400',color:'#646a73'}">✨ 精修月报</button>
+        <span style="font-size:12px;color:#8f959e;margin-left:auto" v-if="monthlySub==='auto'">最近30天自动刷新</span>
+        <span style="font-size:12px;color:#8f959e;margin-left:auto" v-if="monthlySub==='refined'">人工精修，不自动刷新</span>
+      </div>
+      <iframe v-if="monthlySub==='auto'" src="monthly_report.html" style="width:100%;height:calc(100vh - 130px);border:none;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08)" title="自动月报-最近30天"></iframe>
+      <iframe v-if="monthlySub==='refined'" src="monthly_report_refined.html" style="width:100%;height:calc(100vh - 130px);border:none;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08)" title="精修月报"></iframe>
     </div>
   </div>
 </div>
@@ -264,7 +271,7 @@ const TREND_CATS={"大DAU": ["QQ飞车手游", "三角洲行动", "和平精英"
 const USD2CNY=7.2;
 const {createApp,ref,computed,onMounted,nextTick,watch}=Vue;
 createApp({setup(){
-  const data=ref(DATA),tab=ref("today"),search=ref(""),sortKey=ref("action_time"),sortDir=ref(-1);
+  const data=ref(DATA),tab=ref("today"),search=ref(""),sortKey=ref("action_time"),sortDir=ref(-1),monthlySub=ref("auto");
   const filterStart=ref(""),filterEnd=ref(""),filterGames=ref([]),filterTypes=ref([]),filterStatus=ref([]);
   const revSortKey=ref("val_30d"),dlSortKey=ref("val_30d"),showChange=ref(false);
   const revChartPeriod=ref("7d"),dlChartPeriod=ref("7d");
