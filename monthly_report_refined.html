@@ -461,7 +461,7 @@ body { font-family: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sa
           <span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;background:rgba(255,80,80,.92);color:#fff">同比 -</span>
         </span>
       </div>
-      <div id="chart_12" class="chart-area"></div>
+      <div id="chart_12" class="chart-area"><div style="text-align:center;color:#8f959e;padding-top:140px;font-size:14px">暂无DataBrain流水数据</div></div>
       <div class="key-items">
         <h3>重点动态（1条）</h3><div class="key-item" style="border-left-color:#0958d9">
           <div class="ki-tags"><span class="ki-type" style="background:#0958d920;color:#0958d9">版本更新</span><span class="ki-date">2026-07-11</span></div>
@@ -1027,53 +1027,6 @@ const typeColors = {"商业化": "#d46b08", "版本更新": "#0958d9", "玩法�
     legend: { top: 4, textStyle: { fontSize: 11 } },
     grid: { left: 55, right: 15, top: 40, bottom: 30 },
     xAxis: { type: "category", data: ["2026-05-15", "2026-05-16", "2026-05-17", "2026-05-18", "2026-05-19", "2026-05-20", "2026-05-21", "2026-05-22", "2026-05-23", "2026-05-24", "2026-05-25", "2026-05-26", "2026-05-27", "2026-05-28", "2026-05-29", "2026-05-30", "2026-05-31", "2026-06-01", "2026-06-02", "2026-06-03", "2026-06-04", "2026-06-05", "2026-06-06", "2026-06-07", "2026-06-08", "2026-06-09", "2026-06-10", "2026-06-11", "2026-06-12", "2026-06-13", "2026-06-14", "2026-06-15", "2026-06-16", "2026-06-17", "2026-06-18", "2026-06-19", "2026-06-20", "2026-06-21", "2026-06-22", "2026-06-23", "2026-06-24", "2026-06-25", "2026-06-26", "2026-06-27", "2026-06-28", "2026-06-29", "2026-06-30", "2026-07-01", "2026-07-02", "2026-07-03", "2026-07-04", "2026-07-05", "2026-07-06", "2026-07-07", "2026-07-08", "2026-07-09", "2026-07-10", "2026-07-11", "2026-07-12", "2026-07-13"], axisLabel: { fontSize: 10, formatter: function(v) { return v.slice(5); } } },
-    yAxis: { type: "value", name: "万元", axisLabel: { fontSize: 10 } },
-    series: series,
-    dataZoom: [{ type: "inside" }]
-  });
-  chart.on("click", function(p) {
-    if (p.seriesType === "scatter" && p.data && p.data[4]) window.open(p.data[4], "_blank");
-  });
-})();
-
-(function() {
-  var el = document.getElementById("chart_12");
-  if (!el) return;
-  var chart = echarts.init(el);
-  var scatterData = [];
-  var series = [{
-    name: "流水", type: "line", smooth: true, data: [],
-    lineStyle: {color: "#333", width: 2},
-    areaStyle: {color: "rgba(0,0,0,0.04)"},
-    itemStyle: {color: "#333"}, symbolSize: 0, z: 1,
-    markArea: { silent: true, data: [[{ xAxis: -1, itemStyle: {color: "rgba(255,215,0,0.1)"} }, { xAxis: -1 }]] }
-  }];
-  scatterData.forEach(function(s) {
-    series.push({
-      name: s.name, type: "scatter", data: s.data.map(function(d) { return [d[0], d[1], d[2], d[3], d[4], d[5]]; }),
-      symbolSize: 12, itemStyle: {color: s.color}, z: 10
-    });
-  });
-  chart.setOption({
-    tooltip: { trigger: "axis", confine: true, extraCssText: "max-width:320px;white-space:normal;word-break:break-all;",
-      formatter: function(params) {
-        var d = params[0].axisValue;
-        var lp = params.find(function(p) { return p.seriesType === "line"; });
-        var tip = "<b>" + d + "</b><br/>";
-        if (lp && lp.value !== undefined) tip += "· 流水 " + lp.value.toLocaleString() + " 万元<br/>";
-        var sps = params.filter(function(p) { return p.seriesType === "scatter" && p.data && p.data[2]; });
-        if (sps.length) {
-          tip += '<hr style="margin:4px 0;border:none;border-top:1px solid #eee">';
-          sps.forEach(function(p) {
-            tip += '<div style="margin:3px 0"><span style="color:' + (typeColors[p.data[5]] || "#888") + ';font-weight:500">' + p.data[5] + '</span> ' + p.data[2] + '</div>';
-          });
-        }
-        return tip;
-      }
-    },
-    legend: { top: 4, textStyle: { fontSize: 11 } },
-    grid: { left: 55, right: 15, top: 40, bottom: 30 },
-    xAxis: { type: "category", data: [], axisLabel: { fontSize: 10, formatter: function(v) { return v.slice(5); } } },
     yAxis: { type: "value", name: "万元", axisLabel: { fontSize: 10 } },
     series: series,
     dataZoom: [{ type: "inside" }]
