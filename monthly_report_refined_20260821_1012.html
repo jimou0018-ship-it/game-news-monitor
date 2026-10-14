@@ -22,7 +22,9 @@ h2.cat span{display:inline-block;width:10px;height:10px;border-radius:2px;margin
 .ghead:hover{border-color:#bbb;}
 .gbar{display:inline-block;width:6px;height:22px;border-radius:3px;}
 .gname{font-size:15px;font-weight:600;min-width:110px;}
-.caps{display:flex;gap:8px;flex-wrap:wrap;flex:1;}
+.caps{display:flex;gap:8px;flex-wrap:wrap;flex:1;align-items:center;}
+.hdiv{display:inline-block;width:1px;height:20px;background:#d8d5cb;margin:0 4px;}
+.htag{font-size:11px;color:#a0522d;background:rgba(210,120,60,.10);border-radius:4px;padding:2px 6px;white-space:nowrap;font-weight:600;}
 .pill{font-size:12px;padding:3px 10px;border-radius:12px;background:#f1efe8;color:#555;white-space:nowrap;}
 .pill.up{color:#d83931;background:rgba(216,57,49,.09);}
 .pill.down{color:#1a9e6f;background:rgba(26,158,111,.10);}
@@ -64,14 +66,14 @@ h2.cat span{display:inline-block;width:10px;height:10px;border-radius:2px;margin
 <body>
 <div class="wrap">
 <h1>竞品动态精修月报（2026.08.21–10.12）</h1>
-<div class="sub">周期 2026-08-21 ~ 2026-10-12 · 18 款监控产品 · 保留动态 124 条 · 生成于 2026-10-14 13:28 · 点击游戏条展开，点击散点查看当天动态 ｜ 保留区合计流水 103.99亿（实际有效天数口径）</div>
+<div class="sub">周期 2026-08-21 ~ 2026-10-12 · 18 款监控产品 · 保留动态 124 条 · 生成于 2026-10-14 14:17 · 点击游戏条展开，点击散点查看当天动态 ｜ 保留区合计流水 103.99亿（实际有效天数口径） ｜ 十一假期（09.30–10.07）合计 16.69亿</div>
 <div class="qrcode-section"><img src="data:image/png;base64,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" alt="签到二维码"><div class="qrcap">扫码签到</div></div>
 <h2 class="cat" style="border-color:#534AB7"><span style="background:#534AB7"></span>MMO</h2>
 <div class="gblock">
   <div class="ghead" id="gh_1" onclick="toggleGame(1)">
     <span class="gbar" style="background:#534AB7"></span>
     <span class="gname">逆水寒手游</span>
-    <span class="caps"><span class="pill">1.44亿（实际53天）</span><span class="pill down">环比 -27.1%</span><span class="pill down">同比 -34.7%</span></span>
+    <span class="caps"><span class="pill">1.44亿（实际53天）</span><span class="pill down">环比 -27.1%</span><span class="pill down">同比 -34.7%</span><span class="hdiv"></span><span class="htag">十一假期 09.30–10.07</span><span class="pill">2666万（实际8天）</span><span class="pill down">环比 -23.9%</span><span class="pill down">同比 -55.2%</span></span>
     <span class="arrow">▸</span>
   </div>
   <div class="gbody" id="gb_1" style="display:none">
@@ -85,7 +87,7 @@ h2.cat span{display:inline-block;width:10px;height:10px;border-radius:2px;margin
   <div class="ghead" id="gh_2" onclick="toggleGame(2)">
     <span class="gbar" style="background:#534AB7"></span>
     <span class="gname">燕云十六声</span>
-    <span class="caps"><span class="pill">1.73亿（实际53天）</span><span class="pill down">环比 -30.6%</span><span class="pill down">同比 -50.4%</span></span>
+    <span class="caps"><span class="pill">1.73亿（实际53天）</span><span class="pill down">环比 -30.6%</span><span class="pill down">同比 -50.4%</span><span class="hdiv"></span><span class="htag">十一假期 09.30–10.07</span><span class="pill">2586万（实际8天）</span><span class="pill down">环比 -39.6%</span><span class="pill down">同比 -48.1%</span></span>
     <span class="arrow">▸</span>
   </div>
   <div class="gbody" id="gb_2" style="display:none">
@@ -99,7 +101,7 @@ h2.cat span{display:inline-block;width:10px;height:10px;border-radius:2px;margin
   <div class="ghead" id="gh_3" onclick="toggleGame(3)">
     <span class="gbar" style="background:#534AB7"></span>
     <span class="gname">剑网3</span>
-    <span class="caps"><span class="pill na">暂无流水数据</span><span class="pill na">环比 -</span><span class="pill na">同比 -</span></span>
+    <span class="caps"><span class="pill na">暂无流水数据</span><span class="pill na">环比 -</span><span class="pill na">同比 -</span><span class="hdiv"></span><span class="htag">十一假期 09.30–10.07</span><span class="pill na">假期无流水数据</span></span>
     <span class="arrow">▸</span>
   </div>
   <div class="gbody" id="gb_3" style="display:none">
@@ -113,7 +115,7 @@ h2.cat span{display:inline-block;width:10px;height:10px;border-radius:2px;margin
   <div class="ghead" id="gh_4" onclick="toggleGame(4)">
     <span class="gbar" style="background:#BA7517"></span>
     <span class="gname">蛋仔派对</span>
-    <span class="caps"><span class="pill">4.13亿（实际53天）</span><span class="pill down">环比 -43.1%</span><span class="pill up">同比 +6.3%</span></span>
+    <span class="caps"><span class="pill">4.13亿（实际53天）</span><span class="pill down">环比 -43.1%</span><span class="pill up">同比 +6.3%</span><span class="hdiv"></span><span class="htag">十一假期 09.30–10.07</span><span class="pill">1.20亿（实际8天）</span><span class="pill up">环比 +107.1%</span><span class="pill up">同比 +31.7%</span></span>
     <span class="arrow">▸</span>
   </div>
   <div class="gbody" id="gb_4" style="display:none">
@@ -127,7 +129,7 @@ h2.cat span{display:inline-block;width:10px;height:10px;border-radius:2px;margin
   <div class="ghead" id="gh_5" onclick="toggleGame(5)">
     <span class="gbar" style="background:#BA7517"></span>
     <span class="gname">鹅鸭杀</span>
-    <span class="caps"><span class="pill">4368万（实际53天）</span><span class="pill down">环比 -26.9%</span><span class="pill na">同比 -</span></span>
+    <span class="caps"><span class="pill">4368万（实际53天）</span><span class="pill down">环比 -26.9%</span><span class="pill na">同比 -</span><span class="hdiv"></span><span class="htag">十一假期 09.30–10.07</span><span class="pill">558万（实际8天）</span><span class="pill down">环比 -9.6%</span><span class="pill na">同比 -</span></span>
     <span class="arrow">▸</span>
   </div>
   <div class="gbody" id="gb_5" style="display:none">
@@ -141,7 +143,7 @@ h2.cat span{display:inline-block;width:10px;height:10px;border-radius:2px;margin
   <div class="ghead" id="gh_6" onclick="toggleGame(6)">
     <span class="gbar" style="background:#BA7517"></span>
     <span class="gname">元梦之星</span>
-    <span class="caps"><span class="pill">3913万（实际53天）</span><span class="pill down">环比 -7.0%</span><span class="pill down">同比 -50.0%</span></span>
+    <span class="caps"><span class="pill">3913万（实际53天）</span><span class="pill down">环比 -7.0%</span><span class="pill down">同比 -50.0%</span><span class="hdiv"></span><span class="htag">十一假期 09.30–10.07</span><span class="pill">638万（实际8天）</span><span class="pill up">环比 +60.3%</span><span class="pill down">同比 -66.3%</span></span>
     <span class="arrow">▸</span>
   </div>
   <div class="gbody" id="gb_6" style="display:none">
@@ -155,7 +157,7 @@ h2.cat span{display:inline-block;width:10px;height:10px;border-radius:2px;margin
   <div class="ghead" id="gh_7" onclick="toggleGame(7)">
     <span class="gbar" style="background:#BA7517"></span>
     <span class="gname">心动小镇</span>
-    <span class="caps"><span class="pill">6543万（实际53天）</span><span class="pill down">环比 -29.6%</span><span class="pill down">同比 -35.5%</span></span>
+    <span class="caps"><span class="pill">6543万（实际53天）</span><span class="pill down">环比 -29.6%</span><span class="pill down">同比 -35.5%</span><span class="hdiv"></span><span class="htag">十一假期 09.30–10.07</span><span class="pill">926万（实际8天）</span><span class="pill down">环比 -42.7%</span><span class="pill down">同比 -44.7%</span></span>
     <span class="arrow">▸</span>
   </div>
   <div class="gbody" id="gb_7" style="display:none">
@@ -169,7 +171,7 @@ h2.cat span{display:inline-block;width:10px;height:10px;border-radius:2px;margin
   <div class="ghead" id="gh_8" onclick="toggleGame(8)">
     <span class="gbar" style="background:#185FA5"></span>
     <span class="gname">王者荣耀</span>
-    <span class="caps"><span class="pill">50.05亿（实际53天）</span><span class="pill down">环比 -13.0%</span><span class="pill up">同比 +4.2%</span></span>
+    <span class="caps"><span class="pill">50.05亿（实际53天）</span><span class="pill down">环比 -13.0%</span><span class="pill up">同比 +4.2%</span><span class="hdiv"></span><span class="htag">十一假期 09.30–10.07</span><span class="pill">8.42亿（实际8天）</span><span class="pill down">环比 -20.2%</span><span class="pill down">同比 -17.8%</span></span>
     <span class="arrow">▸</span>
   </div>
   <div class="gbody" id="gb_8" style="display:none">
@@ -183,7 +185,7 @@ h2.cat span{display:inline-block;width:10px;height:10px;border-radius:2px;margin
   <div class="ghead" id="gh_9" onclick="toggleGame(9)">
     <span class="gbar" style="background:#185FA5"></span>
     <span class="gname">和平精英</span>
-    <span class="caps"><span class="pill">18.28亿（实际53天）</span><span class="pill down">环比 -35.3%</span><span class="pill down">同比 -10.8%</span></span>
+    <span class="caps"><span class="pill">18.28亿（实际53天）</span><span class="pill down">环比 -35.3%</span><span class="pill down">同比 -10.8%</span><span class="hdiv"></span><span class="htag">十一假期 09.30–10.07</span><span class="pill">2.23亿（实际8天）</span><span class="pill up">环比 +21.3%</span><span class="pill up">同比 +8.6%</span></span>
     <span class="arrow">▸</span>
   </div>
   <div class="gbody" id="gb_9" style="display:none">
@@ -197,7 +199,7 @@ h2.cat span{display:inline-block;width:10px;height:10px;border-radius:2px;margin
   <div class="ghead" id="gh_10" onclick="toggleGame(10)">
     <span class="gbar" style="background:#185FA5"></span>
     <span class="gname">三角洲行动</span>
-    <span class="caps"><span class="pill">17.92亿（实际53天）</span><span class="pill down">环比 -9.0%</span><span class="pill down">同比 -14.3%</span></span>
+    <span class="caps"><span class="pill">17.92亿（实际53天）</span><span class="pill down">环比 -9.0%</span><span class="pill down">同比 -14.3%</span><span class="hdiv"></span><span class="htag">十一假期 09.30–10.07</span><span class="pill">2.56亿（实际8天）</span><span class="pill up">环比 +22.3%</span><span class="pill down">同比 -24.1%</span></span>
     <span class="arrow">▸</span>
   </div>
   <div class="gbody" id="gb_10" style="display:none">
@@ -211,7 +213,7 @@ h2.cat span{display:inline-block;width:10px;height:10px;border-radius:2px;margin
   <div class="ghead" id="gh_11" onclick="toggleGame(11)">
     <span class="gbar" style="background:#185FA5"></span>
     <span class="gname">QQ飞车手游</span>
-    <span class="caps"><span class="pill">1.10亿（实际53天）</span><span class="pill down">环比 -25.9%</span><span class="pill down">同比 -35.6%</span></span>
+    <span class="caps"><span class="pill">1.10亿（实际53天）</span><span class="pill down">环比 -25.9%</span><span class="pill down">同比 -35.6%</span><span class="hdiv"></span><span class="htag">十一假期 09.30–10.07</span><span class="pill">2094万（实际8天）</span><span class="pill up">环比 +44.0%</span><span class="pill down">同比 -49.4%</span></span>
     <span class="arrow">▸</span>
   </div>
   <div class="gbody" id="gb_11" style="display:none">
@@ -225,7 +227,7 @@ h2.cat span{display:inline-block;width:10px;height:10px;border-radius:2px;margin
   <div class="ghead" id="gh_12" onclick="toggleGame(12)">
     <span class="gbar" style="background:#D4537E"></span>
     <span class="gname">无限暖暖</span>
-    <span class="caps"><span class="pill">5210万（实际53天）</span><span class="pill down">环比 -13.7%</span><span class="pill down">同比 -9.8%</span></span>
+    <span class="caps"><span class="pill">5210万（实际53天）</span><span class="pill down">环比 -13.7%</span><span class="pill down">同比 -9.8%</span><span class="hdiv"></span><span class="htag">十一假期 09.30–10.07</span><span class="pill">446万（实际8天）</span><span class="pill down">环比 -73.2%</span><span class="pill down">同比 -57.7%</span></span>
     <span class="arrow">▸</span>
   </div>
   <div class="gbody" id="gb_12" style="display:none">
@@ -239,7 +241,7 @@ h2.cat span{display:inline-block;width:10px;height:10px;border-radius:2px;margin
   <div class="ghead" id="gh_13" onclick="toggleGame(13)">
     <span class="gbar" style="background:#D4537E"></span>
     <span class="gname">闪耀暖暖</span>
-    <span class="caps"><span class="pill">4353万（实际53天）</span><span class="pill down">环比 -17.2%</span><span class="pill up">同比 +13.5%</span></span>
+    <span class="caps"><span class="pill">4353万（实际53天）</span><span class="pill down">环比 -17.2%</span><span class="pill up">同比 +13.5%</span><span class="hdiv"></span><span class="htag">十一假期 09.30–10.07</span><span class="pill">228万（实际8天）</span><span class="pill down">环比 -81.8%</span><span class="pill down">同比 -54.8%</span></span>
     <span class="arrow">▸</span>
   </div>
   <div class="gbody" id="gb_13" style="display:none">
@@ -253,7 +255,7 @@ h2.cat span{display:inline-block;width:10px;height:10px;border-radius:2px;margin
   <div class="ghead" id="gh_14" onclick="toggleGame(14)">
     <span class="gbar" style="background:#D4537E"></span>
     <span class="gname">以闪亮之名</span>
-    <span class="caps"><span class="pill">5533万（实际53天）</span><span class="pill down">环比 -6.4%</span><span class="pill down">同比 -8.0%</span></span>
+    <span class="caps"><span class="pill">5533万（实际53天）</span><span class="pill down">环比 -6.4%</span><span class="pill down">同比 -8.0%</span><span class="hdiv"></span><span class="htag">十一假期 09.30–10.07</span><span class="pill">562万（实际8天）</span><span class="pill down">环比 -45.2%</span><span class="pill down">同比 -63.7%</span></span>
     <span class="arrow">▸</span>
   </div>
   <div class="gbody" id="gb_14" style="display:none">
@@ -267,7 +269,7 @@ h2.cat span{display:inline-block;width:10px;height:10px;border-radius:2px;margin
   <div class="ghead" id="gh_15" onclick="toggleGame(15)">
     <span class="gbar" style="background:#0F6E56"></span>
     <span class="gname">超自然行动组</span>
-    <span class="caps"><span class="pill">2.51亿（实际53天）</span><span class="pill down">环比 -17.2%</span><span class="pill down">同比 -36.2%</span></span>
+    <span class="caps"><span class="pill">2.51亿（实际53天）</span><span class="pill down">环比 -17.2%</span><span class="pill down">同比 -36.2%</span><span class="hdiv"></span><span class="htag">十一假期 09.30–10.07</span><span class="pill">6015万（实际8天）</span><span class="pill up">环比 +85.1%</span><span class="pill down">同比 -28.8%</span></span>
     <span class="arrow">▸</span>
   </div>
   <div class="gbody" id="gb_15" style="display:none">
@@ -281,7 +283,7 @@ h2.cat span{display:inline-block;width:10px;height:10px;border-radius:2px;margin
   <div class="ghead" id="gh_16" onclick="toggleGame(16)">
     <span class="gbar" style="background:#0F6E56"></span>
     <span class="gname">无畏契约</span>
-    <span class="caps"><span class="pill na">暂无流水数据</span><span class="pill na">环比 -</span><span class="pill na">同比 -</span></span>
+    <span class="caps"><span class="pill na">暂无流水数据</span><span class="pill na">环比 -</span><span class="pill na">同比 -</span><span class="hdiv"></span><span class="htag">十一假期 09.30–10.07</span><span class="pill na">假期无流水数据</span></span>
     <span class="arrow">▸</span>
   </div>
   <div class="gbody" id="gb_16" style="display:none">
@@ -295,7 +297,7 @@ h2.cat span{display:inline-block;width:10px;height:10px;border-radius:2px;margin
   <div class="ghead" id="gh_17" onclick="toggleGame(17)">
     <span class="gbar" style="background:#888780"></span>
     <span class="gname">我的花园世界</span>
-    <span class="caps"><span class="pill">2.45亿（实际53天）</span><span class="pill down">环比 -31.9%</span><span class="pill up">同比 +32.7%</span></span>
+    <span class="caps"><span class="pill">2.45亿（实际53天）</span><span class="pill down">环比 -31.9%</span><span class="pill up">同比 +32.7%</span><span class="hdiv"></span><span class="htag">十一假期 09.30–10.07</span><span class="pill">4484万（实际8天）</span><span class="pill up">环比 +3.8%</span><span class="pill up">同比 +35.3%</span></span>
     <span class="arrow">▸</span>
   </div>
   <div class="gbody" id="gb_17" style="display:none">
@@ -309,7 +311,7 @@ h2.cat span{display:inline-block;width:10px;height:10px;border-radius:2px;margin
   <div class="ghead" id="gh_18" onclick="toggleGame(18)">
     <span class="gbar" style="background:#888780"></span>
     <span class="gname">光遇</span>
-    <span class="caps"><span class="pill">1.39亿（实际53天）</span><span class="pill down">环比 -29.8%</span><span class="pill up">同比 +58.4%</span></span>
+    <span class="caps"><span class="pill">1.39亿（实际53天）</span><span class="pill down">环比 -29.8%</span><span class="pill up">同比 +58.4%</span><span class="hdiv"></span><span class="htag">十一假期 09.30–10.07</span><span class="pill">1592万（实际8天）</span><span class="pill down">环比 -53.1%</span><span class="pill down">同比 -33.7%</span></span>
     <span class="arrow">▸</span>
   </div>
   <div class="gbody" id="gb_18" style="display:none">
@@ -319,7 +321,7 @@ h2.cat span{display:inline-block;width:10px;height:10px;border-radius:2px;margin
     <div class="detail" id="detail_18" style="display:none"></div>
   </div>
 </div>
-<div class="footnote"><b>数据备注</b><ul><li>剑网3：PC端游/数据源缺失，无 Sensor Tower 流水，仅展示动态点位</li><li>鹅鸭杀：去年同窗口无数据（新品/未上线），同比不适用</li><li>无畏契约：PC端游/数据源缺失，无 Sensor Tower 流水，仅展示动态点位</li></ul></div>
+<div class="footnote"><b>数据备注</b><ul><li>剑网3：PC端游/数据源缺失，无 Sensor Tower 流水，仅展示动态点位</li><li>鹅鸭杀（十一假期）：去年同窗口无数据（新品/未上线），同比不适用</li><li>鹅鸭杀：去年同窗口无数据（新品/未上线），同比不适用</li><li>无畏契约：PC端游/数据源缺失，无 Sensor Tower 流水，仅展示动态点位</li></ul></div>
 </div>
 <div class="lb" id="lightbox" onclick="hideLb()"><img id="lbimg" src="" alt=""><div class="lbhint">点击任意处或按 Esc 关闭</div></div>
 <script>
